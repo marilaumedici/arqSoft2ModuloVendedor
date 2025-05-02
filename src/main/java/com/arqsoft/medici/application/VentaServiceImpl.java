@@ -13,7 +13,10 @@ import com.arqsoft.medici.domain.exceptions.InternalErrorException;
 import com.arqsoft.medici.domain.exceptions.ProductoInexistenteException;
 import com.arqsoft.medici.domain.exceptions.UsuarioNoEncontradoException;
 import com.arqsoft.medici.domain.exceptions.ValidacionException;
+import com.arqsoft.medici.infrastructure.cliente.NotificacionCliente;
+import com.arqsoft.medici.infrastructure.cliente.NotificacionRequestDTO;
 import com.arqsoft.medici.infrastructure.cliente.UsuarioCliente;
+import com.arqsoft.medici.infrastructure.cliente.UsuarioResponseDTO;
 import com.arqsoft.medici.infrastructure.persistence.VentaRepository;
 import io.micrometer.common.util.StringUtils;
 
@@ -33,6 +36,9 @@ public class VentaServiceImpl  implements VentaService {
 	@Autowired
 	private UsuarioCliente usuarioClient;
 	
+	@Autowired
+	private NotificacionCliente notificacionClient;
+	
 	private ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("America/Argentina/Buenos_Aires"));
 
 	@Override
@@ -48,7 +54,7 @@ public class VentaServiceImpl  implements VentaService {
 		}
 		
 		//Se llama al componente de usuario para verificar si el usuario ingresado existe
-		usuarioClient.obtenerUsuario(request.getMailComprador());
+		UsuarioResponseDTO usuario = usuarioClient.obtenerUsuario(request.getMailComprador());
 		
 		Producto producto = productoService.obtenerProductoByID(request.getProductoId());
 		
@@ -62,8 +68,22 @@ public class VentaServiceImpl  implements VentaService {
 				producto.getPrecio(), producto.getPrecio() * request.getCantidad(), request.getCantidad());
 		
 		ventaRepository.insert(venta);
+	
+		// envio notificaciones al vendedor
+		NotificacionRequestDTO notificacionVendedorDTO = new NotificacionRequestDTO(); 
+		notificacionVendedorDTO.setEmail(vendedor.getMail());
+		notificacionVendedorDTO.setNombreUsuario(vendedor.getRazonSocial());
+		notificacionVendedorDTO.setNombreProducto(producto.getNombre());
 		
+		notificacionClient.sendNotificacionVendedor(notificacionVendedorDTO);
 		
+		// envio notificaciones al usuario
+		NotificacionRequestDTO notificacionUsuarioDTO = new NotificacionRequestDTO(); 
+		notificacionUsuarioDTO.setEmail(request.getMailComprador());
+		notificacionUsuarioDTO.setNombreUsuario(usuario.getNombre() + " " + usuario.getApellido());
+		notificacionUsuarioDTO.setNombreProducto(producto.getNombre());
+		
+		notificacionClient.sendNotificacionUsuario(notificacionUsuarioDTO);
 	}
 
 	public ProductoService getProductoService() {
@@ -104,6 +124,14 @@ public class VentaServiceImpl  implements VentaService {
 
 	public void setUsuarioClient(UsuarioCliente usuarioClient) {
 		this.usuarioClient = usuarioClient;
+	}
+
+	public NotificacionCliente getNotificacionClient() {
+		return notificacionClient;
+	}
+
+	public void setNotificacionClient(NotificacionCliente notificacionClient) {
+		this.notificacionClient = notificacionClient;
 	}
 
 
