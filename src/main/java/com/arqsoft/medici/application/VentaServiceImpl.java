@@ -87,7 +87,7 @@ public class VentaServiceImpl  implements VentaService {
 			
 			// envio notificaciones al usuario
 			NotificacionRequestDTO notificacionUsuarioDTO = new NotificacionRequestDTO(); 
-			notificacionUsuarioDTO.setEmail(request.getMailComprador());
+			notificacionUsuarioDTO.setEmail(usuario.getMail());
 			//notificacionUsuarioDTO.setEmail("marilaumedici@gmail.com");
 			notificacionUsuarioDTO.setNombreUsuario(usuario.getNombre() + " " + usuario.getApellido());
 			notificacionUsuarioDTO.setNombreProducto(producto.getNombre());
