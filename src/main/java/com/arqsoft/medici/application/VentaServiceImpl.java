@@ -69,21 +69,34 @@ public class VentaServiceImpl  implements VentaService {
 		
 		ventaRepository.insert(venta);
 	
-		// envio notificaciones al vendedor
-		NotificacionRequestDTO notificacionVendedorDTO = new NotificacionRequestDTO(); 
-		notificacionVendedorDTO.setEmail(vendedor.getMail());
-		notificacionVendedorDTO.setNombreUsuario(vendedor.getRazonSocial());
-		notificacionVendedorDTO.setNombreProducto(producto.getNombre());
+		enviarMailsNotificacion(usuario, producto, vendedor);
+	}
+
+	private void enviarMailsNotificacion(UsuarioResponseDTO usuario, Producto producto, Vendedor vendedor) {
 		
-		notificacionClient.sendNotificacionVendedor(notificacionVendedorDTO);
-		
-		// envio notificaciones al usuario
-		NotificacionRequestDTO notificacionUsuarioDTO = new NotificacionRequestDTO(); 
-		notificacionUsuarioDTO.setEmail(request.getMailComprador());
-		notificacionUsuarioDTO.setNombreUsuario(usuario.getNombre() + " " + usuario.getApellido());
-		notificacionUsuarioDTO.setNombreProducto(producto.getNombre());
-		
-		notificacionClient.sendNotificacionUsuario(notificacionUsuarioDTO);
+		try {
+			
+			// envio notificaciones al vendedor
+			NotificacionRequestDTO notificacionVendedorDTO = new NotificacionRequestDTO(); 
+			//notificacionVendedorDTO.setEmail(vendedor.getMail());
+			notificacionVendedorDTO.setEmail("marilaumedici@gmail.com");
+			notificacionVendedorDTO.setNombreUsuario(vendedor.getRazonSocial());
+			notificacionVendedorDTO.setNombreProducto(producto.getNombre());
+			
+			notificacionClient.sendNotificacionVendedor(notificacionVendedorDTO);
+			
+			// envio notificaciones al usuario
+			NotificacionRequestDTO notificacionUsuarioDTO = new NotificacionRequestDTO(); 
+			//notificacionUsuarioDTO.setEmail(request.getMailComprador());
+			notificacionUsuarioDTO.setEmail("marilaumedici@gmail.com");
+			notificacionUsuarioDTO.setNombreUsuario(usuario.getNombre() + " " + usuario.getApellido());
+			notificacionUsuarioDTO.setNombreProducto(producto.getNombre());
+			
+			notificacionClient.sendNotificacionUsuario(notificacionUsuarioDTO);
+			
+		}catch(Exception e) {
+			
+		}
 	}
 
 	public ProductoService getProductoService() {

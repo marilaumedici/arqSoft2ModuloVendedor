@@ -13,7 +13,7 @@ public interface NotificacionCliente {
                  consumes = MediaType.APPLICATION_JSON_VALUE)
     public void sendNotificacionVendedor(@RequestBody NotificacionRequestDTO notificacionDTO);
     
-    @PostMapping(path = "/notificacion/vendedor", 
+    @PostMapping(path = "/notificacion/usuario", 
             consumes = MediaType.APPLICATION_JSON_VALUE)
     public void sendNotificacionUsuario(@RequestBody NotificacionRequestDTO notificacionDTO);
 }
