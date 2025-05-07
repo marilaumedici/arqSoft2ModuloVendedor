@@ -8,6 +8,18 @@ public class UsuarioResponseDTO {
 	private String apellido;
 	private String mail;
 	private UsuarioEstado estado;
+	
+	public UsuarioResponseDTO(String nombre, String apellido, String mail) {
+		super();
+		this.nombre = nombre;
+		this.apellido = apellido;
+		this.mail = mail;
+
+	}
+	
+	public UsuarioResponseDTO() {
+
+	}
 
 	
 	public String getNombre() {

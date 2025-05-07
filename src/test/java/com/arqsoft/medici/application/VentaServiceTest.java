@@ -16,7 +16,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
-
 import com.arqsoft.medici.domain.Producto;
 import com.arqsoft.medici.domain.Vendedor;
 import com.arqsoft.medici.domain.dto.RegistrarVentaDTO;
@@ -24,10 +23,13 @@ import com.arqsoft.medici.domain.exceptions.ProductoInexistenteException;
 import com.arqsoft.medici.domain.exceptions.UsuarioNoEncontradoException;
 import com.arqsoft.medici.domain.exceptions.ValidacionException;
 import com.arqsoft.medici.domain.utils.ProductoCategoria;
+import com.arqsoft.medici.domain.utils.VendedorEstado;
+import com.arqsoft.medici.infrastructure.cliente.NotificacionCliente;
 import com.arqsoft.medici.infrastructure.cliente.UsuarioCliente;
 import com.arqsoft.medici.infrastructure.persistence.VentaRepository;
 import com.arqsoft.medici.domain.Venta;
 import com.arqsoft.medici.infrastructure.cliente.UsuarioResponseDTO;
+import com.arqsoft.medici.infrastructure.cliente.NotificacionRequestDTO;
 
 @ExtendWith(MockitoExtension.class)
 public class VentaServiceTest {
@@ -50,6 +52,15 @@ public class VentaServiceTest {
 	@Mock
 	private UsuarioCliente usuarioClient;
 	
+	@Captor
+	private ArgumentCaptor<NotificacionRequestDTO> ventaCompradorCaptor;
+	
+	@Captor
+	private ArgumentCaptor<NotificacionRequestDTO> ventaVendedorCaptor;
+	
+	@Mock
+	private NotificacionCliente notificacionClient;
+	
 	
 	private String mailVendedor1 = "naturisteros@gmail.com";
 	private String razonSoacialVendedor1 = "Tienda naturista Naturisteros";
@@ -62,6 +73,9 @@ public class VentaServiceTest {
 	private ProductoCategoria ALIMENTOS = ProductoCategoria.ALIMENTOS;
 
 	private String email_comprador    		= "agussusu@gmal.com";
+	private String nombre_comprador    		= "Agus";
+	private String apellido_comprador    		= "Susu";
+
 
 	
 	@Test
@@ -69,14 +83,13 @@ public class VentaServiceTest {
 		
 		int cantidad = 10;
 		
-		when(usuarioClient.obtenerUsuario(email_comprador)).thenReturn(new UsuarioResponseDTO());
+		UsuarioResponseDTO userDTO = new UsuarioResponseDTO(nombre_comprador,apellido_comprador, email_comprador);
+		when(usuarioClient.obtenerUsuario(email_comprador)).thenReturn(userDTO);
 		
 		Producto producto = new Producto(codigoP1, nombreP1, descripcionP1, precioP1, stockP1, ALIMENTOS);
 		Vendedor vendedor = new Vendedor(mailVendedor1, razonSoacialVendedor1);
 		producto.setVendedor(vendedor);
 		when(productoService.obtenerProductoByID(codigoP1)).thenReturn(producto);
-
-		productoService.descontarStock(producto, cantidad );
 
 		when(ventaRepository.insert(any(Venta.class))).thenAnswer(invocation -> invocation.getArgument(0));
 		
@@ -88,6 +101,9 @@ public class VentaServiceTest {
 
 		verify(ventaRepository).insert(ventaCaptor.capture());
 		
+		verify(productoService).descontarStock(any(Producto.class), any(Integer.class) );
+
+		
 		Venta capturado = ventaCaptor.getValue();
 		
 	    assertEquals(cantidad, capturado.getCantidadComprada());
@@ -96,6 +112,22 @@ public class VentaServiceTest {
 	    assertEquals(cantidad * precioP1, capturado.getPrecioFinal());
 	    assertEquals(precioP1, capturado.getPrecioIndividual());
 	    assertEquals(codigoP1, capturado.getProductoId());
+	    
+	    verify(notificacionClient).sendNotificacionVendedor(ventaVendedorCaptor.capture());
+	    
+	    verify(notificacionClient).sendNotificacionUsuario(ventaCompradorCaptor.capture());
+	    
+	    NotificacionRequestDTO notiVendedorcapturado = ventaVendedorCaptor.getValue();
+		
+	    assertEquals(mailVendedor1, notiVendedorcapturado.getEmail());
+	    assertEquals(nombreP1, notiVendedorcapturado.getNombreProducto());
+	    assertEquals(razonSoacialVendedor1, notiVendedorcapturado.getNombreUsuario());
+	    
+	    NotificacionRequestDTO notiCompradorcapturado = ventaCompradorCaptor.getValue();
+
+	    assertEquals(email_comprador, notiCompradorcapturado.getEmail());
+	    assertEquals(nombreP1, notiCompradorcapturado.getNombreProducto());
+	    assertEquals(nombre_comprador+" "+apellido_comprador, notiCompradorcapturado.getNombreUsuario());
 
 	}
 	
@@ -119,6 +151,8 @@ public class VentaServiceTest {
 		request.setMailComprador(email_comprador);
 		request.setProductoId(codigoP1);
 		assertThrows(ValidacionException.class, () -> { ventaService.procesarVenta(request); });
+
+		verify(productoService).descontarStock(any(Producto.class), any(Integer.class) );
 
 
 	}
@@ -188,6 +222,30 @@ public class VentaServiceTest {
 
 	public void setUsuarioClient(UsuarioCliente usuarioClient) {
 		this.usuarioClient = usuarioClient;
+	}
+
+	public NotificacionCliente getNotificacionClient() {
+		return notificacionClient;
+	}
+
+	public void setNotificacionClient(NotificacionCliente notificacionClient) {
+		this.notificacionClient = notificacionClient;
+	}
+
+	public ArgumentCaptor<NotificacionRequestDTO> getVentaCompradorCaptor() {
+		return ventaCompradorCaptor;
+	}
+
+	public void setVentaCompradorCaptor(ArgumentCaptor<NotificacionRequestDTO> ventaCompradorCaptor) {
+		this.ventaCompradorCaptor = ventaCompradorCaptor;
+	}
+
+	public ArgumentCaptor<NotificacionRequestDTO> getVentaVendedorCaptor() {
+		return ventaVendedorCaptor;
+	}
+
+	public void setVentaVendedorCaptor(ArgumentCaptor<NotificacionRequestDTO> ventaVendedorCaptor) {
+		this.ventaVendedorCaptor = ventaVendedorCaptor;
 	}
 	
 
