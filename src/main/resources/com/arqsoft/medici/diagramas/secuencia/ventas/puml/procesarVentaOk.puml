@@ -2,7 +2,8 @@
 actor Usuario
 activate VentaController
 activate VentaService
-activate UsuarioService
+activate UsuarioCliente
+activate NotificacionCliente
 activate ProductoService
 activate VentaRepository
 database MongoDB
@@ -17,9 +18,9 @@ VentaService -> VentaService: validarEmailCompradorNoVacio
 
 VentaService -> VentaService: validarIdProductoNoVacio
 
-VentaService -> UsuarioService: obtenerUsuarioByMail
+VentaService -> UsuarioCliente: obtenerUsuarioByMail
 
-UsuarioService -> VentaService: <<usuario encontrado>>
+UsuarioCliente -> VentaService: <<usuario encontrado>>
 
 VentaService -> ProductoService: obtenerProductoByCodigo
 
@@ -29,10 +30,13 @@ VentaService -> VentaService: obtieneVendedorDelProducto
 
 VentaService -> ProductoService: descontarStock
 
-VentaService -> VentaRepository: crearVenta
+VentaService -> VentaRepository: registrarVenta
 
-VentaRepository -> MongoDB: crearVenta
+VentaRepository -> MongoDB: registrarVenta
 
+VentaService -> NotificacionCliente: enviarMailComprador
+
+VentaService -> NotificacionCliente: enviarMailVendedor
 
 legend
 <b>ESCENARIO:</b> Generar una venta

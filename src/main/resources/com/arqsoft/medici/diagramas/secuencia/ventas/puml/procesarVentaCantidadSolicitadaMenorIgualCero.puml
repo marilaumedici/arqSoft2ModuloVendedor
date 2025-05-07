@@ -2,7 +2,7 @@
 actor Usuario
 activate VentaController
 activate VentaService
-activate UsuarioService
+activate UsuarioCliente
 activate ProductoService
 
 
@@ -16,9 +16,9 @@ VentaService -> VentaService: validarEmailCompradorNoVacio
 
 VentaService -> VentaService: validarIdProductoNoVacio
 
-VentaService -> UsuarioService: obtenerUsuarioByMail
+VentaService -> UsuarioCliente: obtenerUsuarioByMail
 
-UsuarioService -> VentaService: <<usuario encontrado>>
+UsuarioCliente -> VentaService: <<usuario encontrado>>
 
 VentaService -> ProductoService: obtenerProductoByCodigo
 
