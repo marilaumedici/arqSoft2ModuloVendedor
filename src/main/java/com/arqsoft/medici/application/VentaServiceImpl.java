@@ -78,8 +78,8 @@ public class VentaServiceImpl  implements VentaService {
 			
 			// envio notificaciones al vendedor
 			NotificacionRequestDTO notificacionVendedorDTO = new NotificacionRequestDTO(); 
+			notificacionVendedorDTO.setEmail("marilaumedici@gmail.com");
 			notificacionVendedorDTO.setEmail(vendedor.getMail());
-			//notificacionVendedorDTO.setEmail("marilaumedici@gmail.com");
 			notificacionVendedorDTO.setNombreUsuario(vendedor.getRazonSocial());
 			notificacionVendedorDTO.setNombreProducto(producto.getNombre());
 			
@@ -87,8 +87,8 @@ public class VentaServiceImpl  implements VentaService {
 			
 			// envio notificaciones al usuario
 			NotificacionRequestDTO notificacionUsuarioDTO = new NotificacionRequestDTO(); 
+			notificacionUsuarioDTO.setEmail("marilaumedici@gmail.com");
 			notificacionUsuarioDTO.setEmail(usuario.getMail());
-			//notificacionUsuarioDTO.setEmail("marilaumedici@gmail.com");
 			notificacionUsuarioDTO.setNombreUsuario(usuario.getNombre() + " " + usuario.getApellido());
 			notificacionUsuarioDTO.setNombreProducto(producto.getNombre());
 			

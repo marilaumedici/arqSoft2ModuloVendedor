@@ -2,9 +2,12 @@ package com.arqsoft.medici.domain;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
+import org.springframework.data.mongodb.core.mapping.Document;
+
 import com.arqsoft.medici.domain.utils.ProductoCategoria;
 import com.arqsoft.medici.domain.utils.ProductoEstado;
 
+@Document(collection = "producto")
 public class Producto {
 	
 	@Id

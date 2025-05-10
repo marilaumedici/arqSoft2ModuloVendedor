@@ -1,8 +1,11 @@
 package com.arqsoft.medici.domain;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+
 import com.arqsoft.medici.domain.utils.VendedorEstado;
 
+@Document(collection = "vendedor")
 public class Vendedor {
 	
 	@Id
