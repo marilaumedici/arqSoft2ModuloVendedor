@@ -18,7 +18,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import com.arqsoft.medici.domain.Producto;
 import com.arqsoft.medici.domain.Vendedor;
-import com.arqsoft.medici.domain.dto.ProductoDTO;
+import com.arqsoft.medici.domain.dto.FiltroBuscadorProductoDomain;
+import com.arqsoft.medici.domain.dto.ProductoDomainDTO;
+import com.arqsoft.medici.domain.dto.ProductosVendedorDomainDTO;
 import com.arqsoft.medici.domain.exceptions.InternalErrorException;
 import com.arqsoft.medici.domain.exceptions.VendedorNoEncontradoException;
 import com.arqsoft.medici.domain.exceptions.ProductoInexistenteException;
@@ -26,11 +28,13 @@ import com.arqsoft.medici.domain.utils.ProductoCategoria;
 import com.arqsoft.medici.domain.utils.ProductoEstado;
 import com.arqsoft.medici.infrastructure.persistence.ProductoRepository;
 import com.arqsoft.medici.infrastructure.persistence.puertos.ProductoDAO;
-import com.arqsoft.medici.domain.dto.FiltroBuscadorProducto;
+import com.arqsoft.medici.infrastructure.rest.dto.FiltroBuscadorProducto;
+import com.arqsoft.medici.infrastructure.rest.dto.ProductoDTO;
+import com.arqsoft.medici.infrastructure.rest.dto.ProductosPaginado;
+import com.arqsoft.medici.infrastructure.rest.dto.ProductosVendedorDTO;
+
 import java.util.List;
 import java.util.ArrayList;
-import com.arqsoft.medici.domain.dto.ProductosPaginado;
-import com.arqsoft.medici.domain.dto.ProductosVendedorDTO;
 
 @ExtendWith(MockitoExtension.class)
 public class ProductoServiceTest {
@@ -99,7 +103,7 @@ public class ProductoServiceTest {
 		
 		when(productoRepository.insert(any(Producto.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-		ProductoDTO request = new ProductoDTO(nombreP1, descripcionP1, precioP1, stockP1, ALIMENTOS, mailVendedor1);
+		ProductoDomainDTO request = new ProductoDomainDTO(nombreP1, descripcionP1, precioP1, stockP1, ALIMENTOS, mailVendedor1);
 		assertDoesNotThrow(() -> { productoService.crearProducto(request); });
 
 		verify(vendedorService, times(1)).obtenerVendedorEntidad(mailVendedor1);
@@ -129,7 +133,7 @@ public class ProductoServiceTest {
 
 		when(productoRepository.save(any(Producto.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-		ProductoDTO request = new ProductoDTO(codigoP1, nombreP1, descripcionP1, precioP1, stockP1, ALIMENTOS, mailVendedor1);
+		ProductoDomainDTO request = new ProductoDomainDTO(codigoP1, nombreP1, descripcionP1, precioP1, stockP1, ALIMENTOS, mailVendedor1);
 		assertDoesNotThrow(() -> { productoService.crearProducto(request); });
 
 		verify(productoRepository, times(1)).findById(codigoP1);
@@ -154,7 +158,7 @@ public class ProductoServiceTest {
 		Optional<Producto> productoOpcional = Optional.empty(); 
 		when(productoRepository.findById(codigoP1)).thenReturn(productoOpcional);
 
-		ProductoDTO request = new ProductoDTO(codigoP1, nombreP1, descripcionP1, precioP1, stockP1, ALIMENTOS, mailVendedor1);
+		ProductoDomainDTO request = new ProductoDomainDTO(codigoP1, nombreP1, descripcionP1, precioP1, stockP1, ALIMENTOS, mailVendedor1);
 		assertThrows(ProductoInexistenteException.class, () -> {  productoService.crearProducto(request); });
 		
 	}
@@ -170,7 +174,7 @@ public class ProductoServiceTest {
 
 		when(productoRepository.save(any(Producto.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-		ProductoDTO request = new ProductoDTO(codigoP1, nombreP1_nuevo, descripcionP1_nuevo, precioP1_nuevo, stockP1_nuevo, CONGELADOS, mailVendedor1);
+		ProductoDomainDTO request = new ProductoDomainDTO(codigoP1, nombreP1_nuevo, descripcionP1_nuevo, precioP1_nuevo, stockP1_nuevo, CONGELADOS, mailVendedor1);
 		assertDoesNotThrow(() -> { productoService.modificarProducto(request); });
 		
 		verify(productoRepository, times(1)).findById(codigoP1);
@@ -200,7 +204,7 @@ public class ProductoServiceTest {
 		Optional<Producto> productoOpcional = Optional.of(producto); 
 		when(productoRepository.findById(codigoP1)).thenReturn(productoOpcional);
 
-		ProductoDTO request = new ProductoDTO(codigoP1, nombreP1_nuevo, descripcionP1_nuevo, precioP1_nuevo, stockP1_nuevo, ALIMENTOS, mailVendedor2);
+		ProductoDomainDTO request = new ProductoDomainDTO(codigoP1, nombreP1_nuevo, descripcionP1_nuevo, precioP1_nuevo, stockP1_nuevo, ALIMENTOS, mailVendedor2);
 		assertThrows(InternalErrorException.class, () -> {  productoService.modificarProducto(request); });
 
 		verify(productoRepository, times(1)).findById(codigoP1);
@@ -213,7 +217,7 @@ public class ProductoServiceTest {
 		Optional<Producto> productoOpcional = Optional.empty(); 
 		when(productoRepository.findById(codigoP1)).thenReturn(productoOpcional);
 
-		ProductoDTO request = new ProductoDTO(codigoP1, nombreP1_nuevo, descripcionP1_nuevo, precioP1_nuevo, stockP1_nuevo, ALIMENTOS, mailVendedor1);
+		ProductoDomainDTO request = new ProductoDomainDTO(codigoP1, nombreP1_nuevo, descripcionP1_nuevo, precioP1_nuevo, stockP1_nuevo, ALIMENTOS, mailVendedor1);
 		assertThrows(ProductoInexistenteException.class, () -> {  productoService.modificarProducto(request); });
 
 		verify(productoRepository, times(1)).findById(codigoP1);
@@ -224,7 +228,7 @@ public class ProductoServiceTest {
 	public void testModificarProductoMailVendedorVacio() {
 		
 
-		ProductoDTO request = new ProductoDTO(codigoP1, nombreP1_nuevo, descripcionP1_nuevo, precioP1_nuevo, stockP1_nuevo, ALIMENTOS, "");
+		ProductoDomainDTO request = new ProductoDomainDTO(codigoP1, nombreP1_nuevo, descripcionP1_nuevo, precioP1_nuevo, stockP1_nuevo, ALIMENTOS, "");
 		assertThrows(InternalErrorException.class, () -> {  productoService.modificarProducto(request); });
 
 		
@@ -233,7 +237,7 @@ public class ProductoServiceTest {
 	@Test
 	public void testModificarProductoMailCodigoProductoVacio() {
 		
-		ProductoDTO request = new ProductoDTO("", nombreP1_nuevo, descripcionP1_nuevo, precioP1_nuevo, stockP1_nuevo, ALIMENTOS, mailVendedor1);
+		ProductoDomainDTO request = new ProductoDomainDTO("", nombreP1_nuevo, descripcionP1_nuevo, precioP1_nuevo, stockP1_nuevo, ALIMENTOS, mailVendedor1);
 		assertThrows(InternalErrorException.class, () -> {  productoService.modificarProducto(request); });
 
 	}
@@ -336,13 +340,13 @@ public class ProductoServiceTest {
 
 		ProductosPaginado pagina =  new ProductosPaginado(productos, 0, 4, 1);
 		
-		FiltroBuscadorProducto dto = new FiltroBuscadorProducto();
+		FiltroBuscadorProductoDomain dto = new FiltroBuscadorProductoDomain();
 		when(productoDAO.buscarProductos(dto)).thenReturn(pagina);
 
 		
 		assertDoesNotThrow(() -> {
 			
-			ProductosVendedorDTO response = productoService.obtenerProductosFiltrados(dto);
+			ProductosVendedorDomainDTO response = productoService.obtenerProductosFiltrados(dto);
 			assertNotNull(response.getProductos());
 		    assertEquals(response.getProductos().size(), 4);
 		    assertEquals(response.getPaginaActual(), 0);
@@ -379,14 +383,14 @@ public class ProductoServiceTest {
 
 		ProductosPaginado pagina =  new ProductosPaginado(productos, 0, 3, 1);
 		
-		FiltroBuscadorProducto dto = new FiltroBuscadorProducto();
+		FiltroBuscadorProductoDomain dto = new FiltroBuscadorProductoDomain();
 		dto.setCategoria(TECNOLOGIA);
 		when(productoDAO.buscarProductos(dto)).thenReturn(pagina);
 
 		
 		assertDoesNotThrow(() -> {
 			
-			ProductosVendedorDTO response = productoService.obtenerProductosFiltrados(dto);
+			ProductosVendedorDomainDTO response = productoService.obtenerProductosFiltrados(dto);
 			assertNotNull(response.getProductos());
 		    assertEquals(response.getProductos().size(), 3);
 		    assertEquals(response.getPaginaActual(), 0);
@@ -426,7 +430,7 @@ public class ProductoServiceTest {
 
 		ProductosPaginado pagina =  new ProductosPaginado(productos, 0, 2, 1);
 		
-		FiltroBuscadorProducto dto = new FiltroBuscadorProducto();
+		FiltroBuscadorProductoDomain dto = new FiltroBuscadorProductoDomain();
 		dto.setPrecioMinimo(10000);
 		dto.setPrecioMaximo(300000);
 		when(productoDAO.buscarProductos(dto)).thenReturn(pagina);
@@ -434,7 +438,7 @@ public class ProductoServiceTest {
 		
 		assertDoesNotThrow(() -> {
 			
-			ProductosVendedorDTO response = productoService.obtenerProductosFiltrados(dto);
+			ProductosVendedorDomainDTO response = productoService.obtenerProductosFiltrados(dto);
 			assertNotNull(response.getProductos());
 		    assertEquals(response.getProductos().size(), 2);
 		    assertEquals(response.getPaginaActual(), 0);

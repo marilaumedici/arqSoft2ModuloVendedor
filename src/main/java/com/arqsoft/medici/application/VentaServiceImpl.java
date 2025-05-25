@@ -6,9 +6,9 @@ import java.util.Date;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.arqsoft.medici.domain.Venta;
+import com.arqsoft.medici.domain.dto.RegistrarVentaDomainDTO;
 import com.arqsoft.medici.domain.Producto;
 import com.arqsoft.medici.domain.Vendedor;
-import com.arqsoft.medici.domain.dto.RegistrarVentaDTO;
 import com.arqsoft.medici.domain.exceptions.InternalErrorException;
 import com.arqsoft.medici.domain.exceptions.ProductoInexistenteException;
 import com.arqsoft.medici.domain.exceptions.UsuarioNoEncontradoException;
@@ -42,7 +42,7 @@ public class VentaServiceImpl  implements VentaService {
 	private ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("America/Argentina/Buenos_Aires"));
 
 	@Override
-	public void procesarVenta(RegistrarVentaDTO request) throws InternalErrorException, ValidacionException, ProductoInexistenteException, UsuarioNoEncontradoException {
+	public void procesarVenta(RegistrarVentaDomainDTO request) throws InternalErrorException, ValidacionException, ProductoInexistenteException, UsuarioNoEncontradoException {
 		
 		if(StringUtils.isBlank(request.getProductoId())) {
 			throw new InternalErrorException("El id del producto no puede estar vacio.");

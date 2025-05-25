@@ -97,3 +97,12 @@ mvn spring-boot:run
 ```
 
 El servicio estará disponible en esta url http://localhost:8080/
+
+
+## Swagger
+
+Para obtener el swagger del servicio, una vez que se encuentre arriba, en un navegador se debera colocar la siguiente url:
+
+```swagger
+http://localhost:8080/swagger-ui/index.html
+```

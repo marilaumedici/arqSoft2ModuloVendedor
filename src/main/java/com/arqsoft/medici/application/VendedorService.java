@@ -1,8 +1,8 @@
 package com.arqsoft.medici.application;
 
 import com.arqsoft.medici.domain.Vendedor;
-import com.arqsoft.medici.domain.dto.VendedorDTO;
-import com.arqsoft.medici.domain.dto.VendedorDatosDTO;
+import com.arqsoft.medici.domain.dto.VendedorDatosDomainDTO;
+import com.arqsoft.medici.domain.dto.VendedorDomainDTO;
 import com.arqsoft.medici.domain.exceptions.FormatoEmailInvalidoException;
 import com.arqsoft.medici.domain.exceptions.InternalErrorException;
 import com.arqsoft.medici.domain.exceptions.VendedorExistenteException;
@@ -10,9 +10,9 @@ import com.arqsoft.medici.domain.exceptions.VendedorNoEncontradoException;
 
 public interface VendedorService {
 
-	void crearVendedor(VendedorDTO request) throws InternalErrorException, FormatoEmailInvalidoException, VendedorExistenteException;
+	void crearVendedor(VendedorDomainDTO request) throws InternalErrorException, FormatoEmailInvalidoException, VendedorExistenteException;
 
-	void modificarVendedor(VendedorDTO request) throws InternalErrorException, VendedorNoEncontradoException;
+	void modificarVendedor(VendedorDomainDTO request) throws InternalErrorException, VendedorNoEncontradoException;
 	
 	void eliminarVendedor(String mail) throws InternalErrorException, VendedorNoEncontradoException;
 	
@@ -20,7 +20,7 @@ public interface VendedorService {
 
 	void actualizarVendedor(Vendedor vendedor);
 
-	VendedorDatosDTO obtenerVendedor(String mail);
+	VendedorDatosDomainDTO obtenerVendedor(String mail) throws VendedorNoEncontradoException;
 
 
 

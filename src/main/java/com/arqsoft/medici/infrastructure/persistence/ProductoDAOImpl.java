@@ -13,11 +13,11 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Repository;
 import com.arqsoft.medici.domain.Producto;
 import com.arqsoft.medici.domain.Vendedor;
-import com.arqsoft.medici.domain.dto.FiltroBuscadorProducto;
-import com.arqsoft.medici.domain.dto.ProductosPaginado;
+import com.arqsoft.medici.domain.dto.FiltroBuscadorProductoDomain;
 import com.arqsoft.medici.domain.utils.ProductoEstado;
 import com.arqsoft.medici.domain.utils.VendedorEstado;
 import com.arqsoft.medici.infrastructure.persistence.puertos.ProductoDAO;
+import com.arqsoft.medici.infrastructure.rest.dto.ProductosPaginado;
 
 import io.micrometer.common.util.StringUtils;
 
@@ -29,7 +29,7 @@ public class ProductoDAOImpl implements ProductoDAO {
 	private MongoTemplate mongoTemplate;
 	
 	@Override
-	public ProductosPaginado buscarProductos(FiltroBuscadorProducto request) {
+	public ProductosPaginado buscarProductos(FiltroBuscadorProductoDomain request) {
 		
 	PageRequest pageRequest = PageRequest.of(request.getPagina(), request.getSize());
 		

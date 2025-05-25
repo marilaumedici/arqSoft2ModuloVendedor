@@ -18,16 +18,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 import com.arqsoft.medici.domain.Producto;
 import com.arqsoft.medici.domain.Vendedor;
-import com.arqsoft.medici.domain.dto.RegistrarVentaDTO;
 import com.arqsoft.medici.domain.exceptions.ProductoInexistenteException;
 import com.arqsoft.medici.domain.exceptions.UsuarioNoEncontradoException;
 import com.arqsoft.medici.domain.exceptions.ValidacionException;
 import com.arqsoft.medici.domain.utils.ProductoCategoria;
-import com.arqsoft.medici.domain.utils.VendedorEstado;
 import com.arqsoft.medici.infrastructure.cliente.NotificacionCliente;
 import com.arqsoft.medici.infrastructure.cliente.UsuarioCliente;
 import com.arqsoft.medici.infrastructure.persistence.VentaRepository;
 import com.arqsoft.medici.domain.Venta;
+import com.arqsoft.medici.domain.dto.RegistrarVentaDomainDTO;
 import com.arqsoft.medici.infrastructure.cliente.UsuarioResponseDTO;
 import com.arqsoft.medici.infrastructure.cliente.NotificacionRequestDTO;
 
@@ -39,9 +38,6 @@ public class VentaServiceTest {
 	
 	@Mock
 	private ProductoServiceImpl productoService;
-
-	//@Mock
-	//private UsuarioServiceImpl usuarioService;
 	
 	@Mock
 	private VentaRepository ventaRepository;
@@ -93,7 +89,7 @@ public class VentaServiceTest {
 
 		when(ventaRepository.insert(any(Venta.class))).thenAnswer(invocation -> invocation.getArgument(0));
 		
-		RegistrarVentaDTO request =  new RegistrarVentaDTO();
+		RegistrarVentaDomainDTO request =  new RegistrarVentaDomainDTO();
 		request.setCantidad(cantidad);
 		request.setMailComprador(email_comprador);
 		request.setProductoId(codigoP1);
@@ -146,7 +142,7 @@ public class VentaServiceTest {
 
 		doThrow(new ValidacionException("La cantidad ingresada debe ser menor o igual al stock disponible.")).when(productoService).descontarStock(producto, cantidad );
 		
-		RegistrarVentaDTO request =  new RegistrarVentaDTO();
+		RegistrarVentaDomainDTO request =  new RegistrarVentaDomainDTO();
 		request.setCantidad(cantidad);
 		request.setMailComprador(email_comprador);
 		request.setProductoId(codigoP1);
@@ -173,7 +169,7 @@ public class VentaServiceTest {
 
 		doThrow(new ValidacionException("La cantidad ingresada debe ser mayor o igual a 1.")).when(productoService).descontarStock(producto, cantidad );
 		
-		RegistrarVentaDTO request =  new RegistrarVentaDTO();
+		RegistrarVentaDomainDTO request =  new RegistrarVentaDomainDTO();
 		request.setCantidad(cantidad);
 		request.setMailComprador(email_comprador);
 		request.setProductoId(codigoP1);
@@ -189,7 +185,7 @@ public class VentaServiceTest {
 		
 		doThrow(new ResponseStatusException(HttpStatus.BAD_REQUEST, "No se encontro el usuario.", new UsuarioNoEncontradoException())).when(usuarioClient).obtenerUsuario(email_comprador);
 
-		RegistrarVentaDTO request =  new RegistrarVentaDTO();
+		RegistrarVentaDomainDTO request =  new RegistrarVentaDomainDTO();
 		request.setCantidad(cantidad);
 		request.setMailComprador(email_comprador);
 		request.setProductoId(codigoP1);
@@ -207,7 +203,7 @@ public class VentaServiceTest {
 		
 		doThrow(new ProductoInexistenteException()).when(productoService).obtenerProductoByID(codigoP1);
 		
-		RegistrarVentaDTO request =  new RegistrarVentaDTO();
+		RegistrarVentaDomainDTO request =  new RegistrarVentaDomainDTO();
 		request.setCantidad(cantidad);
 		request.setMailComprador(email_comprador);
 		request.setProductoId(codigoP1);

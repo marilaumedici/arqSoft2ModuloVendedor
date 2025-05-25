@@ -7,11 +7,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.arqsoft.medici.domain.Producto;
 import com.arqsoft.medici.domain.Vendedor;
-import com.arqsoft.medici.domain.dto.FiltroBuscadorProducto;
-import com.arqsoft.medici.domain.dto.ProductoDTO;
-import com.arqsoft.medici.domain.dto.ProductoResponseDTO;
-import com.arqsoft.medici.domain.dto.ProductosPaginado;
-import com.arqsoft.medici.domain.dto.ProductosVendedorDTO;
+import com.arqsoft.medici.domain.dto.FiltroBuscadorProductoDomain;
+import com.arqsoft.medici.domain.dto.ProductoDomainDTO;
+import com.arqsoft.medici.domain.dto.ProductoDomainResponseDTO;
+import com.arqsoft.medici.domain.dto.ProductosVendedorDomainDTO;
 import com.arqsoft.medici.domain.exceptions.InternalErrorException;
 import com.arqsoft.medici.domain.exceptions.ProductoInexistenteException;
 import com.arqsoft.medici.domain.exceptions.ValidacionException;
@@ -19,6 +18,7 @@ import com.arqsoft.medici.domain.exceptions.VendedorNoEncontradoException;
 import com.arqsoft.medici.domain.utils.ProductoEstado;
 import com.arqsoft.medici.infrastructure.persistence.ProductoRepository;
 import com.arqsoft.medici.infrastructure.persistence.puertos.ProductoDAO;
+import com.arqsoft.medici.infrastructure.rest.dto.ProductosPaginado;
 import io.micrometer.common.util.StringUtils;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -33,20 +33,19 @@ public class ProductoServiceImpl implements ProductoService {
 	
 	@Autowired
 	private ProductoDAO productoDAO;
-	//private MongoTemplate mongoTemplate;
 	
 	@Autowired
 	private VendedorService vendedorService;
 	
 	@Override
-	public ProductoResponseDTO crearProducto(ProductoDTO request) throws InternalErrorException, VendedorNoEncontradoException, ValidacionException, ProductoInexistenteException {
+	public ProductoDomainResponseDTO crearProducto(ProductoDomainDTO request) throws InternalErrorException, VendedorNoEncontradoException, ValidacionException, ProductoInexistenteException {
 		
 		if(StringUtils.isBlank(request.getMailVendedor())) {
 			throw new InternalErrorException("El mail del vendedor no puede estar vacio.");
 			
 		}
 		
-		ProductoResponseDTO response = null;
+		ProductoDomainResponseDTO response = null;
 		
 		if(StringUtils.isNotBlank(request.getCodigoProducto())) {
 			
@@ -61,7 +60,7 @@ public class ProductoServiceImpl implements ProductoService {
 						
 			if(actualizarDatosProducto(request, producto)) {
 				Producto p = productoRepository.save(producto);
-				response = new ProductoResponseDTO(p.getProductoId(), p.getNombre(), p.getDescripcion(), p.getPrecio(), p.getStock(), p.getCategoria(), p.getEstado(), p.getVendedor().getMail());
+				response = new ProductoDomainResponseDTO(p.getProductoId(), p.getNombre(), p.getDescripcion(), p.getPrecio(), p.getStock(), p.getCategoria(), p.getEstado(), p.getVendedor().getMail());
 				
 			}
 		}else {
@@ -75,10 +74,7 @@ public class ProductoServiceImpl implements ProductoService {
 			
 			Producto p = productoRepository.insert(producto);
 			
-			//vendedor.getProductosListados().add(producto);
-			//vendedorService.actualizarVendedor(vendedor);
-			
-			response = new ProductoResponseDTO(p.getProductoId(), p.getNombre(), p.getDescripcion(), p.getPrecio(), p.getStock(), p.getCategoria(),p.getEstado(), p.getVendedor().getMail());
+			response = new ProductoDomainResponseDTO(p.getProductoId(), p.getNombre(), p.getDescripcion(), p.getPrecio(), p.getStock(), p.getCategoria(),p.getEstado(), p.getVendedor().getMail());
 
 		}
 		
@@ -86,7 +82,7 @@ public class ProductoServiceImpl implements ProductoService {
 	}
 	
 	@Override
-	public void modificarProducto(ProductoDTO request) throws InternalErrorException, ProductoInexistenteException {
+	public void modificarProducto(ProductoDomainDTO request) throws InternalErrorException, ProductoInexistenteException {
 		
 		if(StringUtils.isBlank(request.getCodigoProducto())) {
 			throw new InternalErrorException("El id del producto no puede estar vacio.");
@@ -144,7 +140,7 @@ public class ProductoServiceImpl implements ProductoService {
 	}
 	
 	@Override
-	public ProductosVendedorDTO obtenerProductosVendedor(String mailVendedor, Integer pagina, Integer size) throws InternalErrorException {
+	public ProductosVendedorDomainDTO obtenerProductosVendedor(String mailVendedor, Integer pagina, Integer size) throws InternalErrorException {
 		
 		if(StringUtils.isBlank(mailVendedor)) {
 			throw new InternalErrorException("El mail del vendedor no puede estar vacio.");
@@ -155,7 +151,7 @@ public class ProductoServiceImpl implements ProductoService {
 	    Page<Producto> productosPage = productoRepository.findByVendedor_Mail(mailVendedor, pageable);
 	    List<Producto> productos = productosPage.getContent();
 	    
-	    ProductosVendedorDTO response = productoEntityToDTO(productos, productosPage.getNumber(), productosPage.getTotalPages(), productosPage.getTotalElements());
+	    ProductosVendedorDomainDTO response = productoEntityToDTO(productos, productosPage.getNumber(), productosPage.getTotalPages(), productosPage.getTotalElements());
 	    
 	    return response;
 	}
@@ -199,11 +195,11 @@ public class ProductoServiceImpl implements ProductoService {
 	}
 	
 	@Override
-	public ProductosVendedorDTO obtenerProductosFiltrados(FiltroBuscadorProducto request) {
+	public ProductosVendedorDomainDTO obtenerProductosFiltrados(FiltroBuscadorProductoDomain request) {
 
 		ProductosPaginado  productos = productoDAO.buscarProductos(request);
 		
-		ProductosVendedorDTO response = productoEntityToDTO(productos.getProductos(), productos.getPagina(), productos.getTotalPaginas(), productos.getTotalElementos());
+		ProductosVendedorDomainDTO response = productoEntityToDTO(productos.getProductos(), productos.getPagina(), productos.getTotalPaginas(), productos.getTotalElementos());
 		
 		return response;
 	}
@@ -236,7 +232,7 @@ public class ProductoServiceImpl implements ProductoService {
 	 * @return Si actualizo algun campo para actualizar del ente
 	 * @throws InternalErrorException
 	 */
-	private boolean actualizarDatosProducto(ProductoDTO request, Producto producto) throws InternalErrorException {
+	private boolean actualizarDatosProducto(ProductoDomainDTO request, Producto producto) throws InternalErrorException {
 		
 		validarProductoMismoVendedor(producto.getVendedor().getMail(), request.getMailVendedor(), "Un vendedor no puede modificar el producto de otro vendedor.");
 
@@ -274,7 +270,7 @@ public class ProductoServiceImpl implements ProductoService {
 		return cambio;
 	}
 	
-	private void validarDatosCreacionProducto(ProductoDTO request) throws ValidacionException, InternalErrorException {
+	private void validarDatosCreacionProducto(ProductoDomainDTO request) throws ValidacionException, InternalErrorException {
 		
 		if(StringUtils.isBlank(request.getNombre())) {
 			throw new ValidacionException("Debe ingresar un nombre para el producto.");
@@ -298,12 +294,12 @@ public class ProductoServiceImpl implements ProductoService {
 		}
 	}
 	
-	private ProductosVendedorDTO productoEntityToDTO(List<Producto> productos, Integer paginaActual, Integer totalPaginas, long totalResultados) {
+	private ProductosVendedorDomainDTO productoEntityToDTO(List<Producto> productos, Integer paginaActual, Integer totalPaginas, long totalResultados) {
 		
-		ProductosVendedorDTO response =  new ProductosVendedorDTO( paginaActual,  totalPaginas, totalResultados);
+		ProductosVendedorDomainDTO response =  new ProductosVendedorDomainDTO( paginaActual,  totalPaginas, totalResultados);
 		
 		for(Producto p : productos) {
-	    	ProductoResponseDTO pDTO = new ProductoResponseDTO(p.getProductoId(), p.getNombre(), p.getDescripcion(), p.getPrecio(), p.getStock(), p.getCategoria(),p.getEstado(), p.getVendedor().getMail());
+			ProductoDomainResponseDTO pDTO = new ProductoDomainResponseDTO(p.getProductoId(), p.getNombre(), p.getDescripcion(), p.getPrecio(), p.getStock(), p.getCategoria(),p.getEstado(), p.getVendedor().getMail());
 	    	response.getProductos().add(pDTO);
 	    }
 		

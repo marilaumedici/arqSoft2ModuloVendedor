@@ -16,13 +16,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import com.arqsoft.medici.domain.Vendedor;
-import com.arqsoft.medici.domain.dto.VendedorDTO;
+import com.arqsoft.medici.domain.dto.VendedorDomainDTO;
 import com.arqsoft.medici.domain.exceptions.FormatoEmailInvalidoException;
 import com.arqsoft.medici.domain.exceptions.InternalErrorException;
 import com.arqsoft.medici.domain.exceptions.VendedorExistenteException;
 import com.arqsoft.medici.domain.exceptions.VendedorNoEncontradoException;
 import com.arqsoft.medici.domain.utils.VendedorEstado;
 import com.arqsoft.medici.infrastructure.persistence.VendedorRepository;
+
 
 @ExtendWith(MockitoExtension.class)
 public class VendedorServiceTest {
@@ -49,7 +50,7 @@ public class VendedorServiceTest {
 		
 		when(vendedorRepository.insert(any(Vendedor.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-		VendedorDTO request = new VendedorDTO(email, razonSoacial);
+		VendedorDomainDTO request = new VendedorDomainDTO(email, razonSoacial);
 		assertDoesNotThrow(() -> { vendedorService.crearVendedor(request); });
 		
 		verify(vendedorRepository, times(1)).findById(email);
@@ -73,7 +74,7 @@ public class VendedorServiceTest {
 		
 		when(vendedorRepository.save(any(Vendedor.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-		VendedorDTO request = new VendedorDTO(email, razonSoacial);
+		VendedorDomainDTO request = new VendedorDomainDTO(email, razonSoacial);
 		assertDoesNotThrow(() -> { vendedorService.crearVendedor(request); });
 		
 		verify(vendedorRepository, times(1)).findById(email);
@@ -96,7 +97,7 @@ public class VendedorServiceTest {
 		Optional<Vendedor> vendedorOpcional = Optional.of(vendedorBD); 
 		when(vendedorRepository.findById(email)).thenReturn(vendedorOpcional);
 		
-		VendedorDTO request = new VendedorDTO(email, razonSoacial);
+		VendedorDomainDTO request = new VendedorDomainDTO(email, razonSoacial);
 		assertThrows(VendedorExistenteException.class, () -> {  vendedorService.crearVendedor(request); });
 		
 		verify(vendedorRepository, times(1)).findById(email);
@@ -106,7 +107,7 @@ public class VendedorServiceTest {
 	@Test
 	public void testCrearVendedorMailVacio() {
 		
-		VendedorDTO request = new VendedorDTO("", razonSoacial);
+		VendedorDomainDTO request = new VendedorDomainDTO("", razonSoacial);
 		assertThrows(InternalErrorException.class, () -> {  vendedorService.crearVendedor(request); });
 		
 	}
@@ -114,7 +115,7 @@ public class VendedorServiceTest {
 	@Test
 	public void testCrearVendedorMailVacioNull() {
 		
-		VendedorDTO request = new VendedorDTO(null, razonSoacial);
+		VendedorDomainDTO request = new VendedorDomainDTO(null, razonSoacial);
 		assertThrows(InternalErrorException.class, () -> {  vendedorService.crearVendedor(request); });
 
 	}
@@ -122,7 +123,7 @@ public class VendedorServiceTest {
 	@Test
 	public void testCrearVendedorMailFormatoInvalido() {
 		
-		VendedorDTO request = new VendedorDTO(email_invalido, razonSoacial);
+		VendedorDomainDTO request = new VendedorDomainDTO(email_invalido, razonSoacial);
 		assertThrows(FormatoEmailInvalidoException.class, () -> {  vendedorService.crearVendedor(request); });
 
 	}
@@ -135,7 +136,7 @@ public class VendedorServiceTest {
 		when(vendedorRepository.findById(email)).thenReturn(vendedorOpcional);
 		when(vendedorRepository.save(any(Vendedor.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-		VendedorDTO request = new VendedorDTO(email, razonSoacial_Nueva);
+		VendedorDomainDTO request = new VendedorDomainDTO(email, razonSoacial_Nueva);
 		assertDoesNotThrow(() -> { vendedorService.modificarVendedor(request); });
 		
 		verify(vendedorRepository, times(1)).findById(email);
@@ -158,7 +159,7 @@ public class VendedorServiceTest {
 		Optional<Vendedor> vendedorOpcional = Optional.of(vendedorBD); 
 		when(vendedorRepository.findById(email)).thenReturn(vendedorOpcional);
 		
-		VendedorDTO request = new VendedorDTO(email, razonSoacial_Nueva);
+		VendedorDomainDTO request = new VendedorDomainDTO(email, razonSoacial_Nueva);
 		assertThrows(VendedorNoEncontradoException.class, () -> {  vendedorService.modificarVendedor(request); });
 		
 		verify(vendedorRepository, times(1)).findById(email);
@@ -171,7 +172,7 @@ public class VendedorServiceTest {
 		Optional<Vendedor> vendedorOpcional = Optional.empty(); 
 		when(vendedorRepository.findById(email)).thenReturn(vendedorOpcional);
 		
-		VendedorDTO request = new VendedorDTO(email, razonSoacial_Nueva);
+		VendedorDomainDTO request = new VendedorDomainDTO(email, razonSoacial_Nueva);
 		assertThrows(VendedorNoEncontradoException.class, () -> {  vendedorService.modificarVendedor(request); });
 		
 		verify(vendedorRepository, times(1)).findById(email);
@@ -181,7 +182,7 @@ public class VendedorServiceTest {
 	@Test
 	public void modificarVendedorMailVacio() {
 		
-		VendedorDTO request = new VendedorDTO("", razonSoacial_Nueva);
+		VendedorDomainDTO request = new VendedorDomainDTO("", razonSoacial_Nueva);
 		assertThrows(InternalErrorException.class, () -> {  vendedorService.modificarVendedor(request); });
 		
 
@@ -190,7 +191,7 @@ public class VendedorServiceTest {
 	@Test
 	public void modificarVendedorMailNull() {
 		
-		VendedorDTO request = new VendedorDTO(null, razonSoacial_Nueva);
+		VendedorDomainDTO request = new VendedorDomainDTO(null, razonSoacial_Nueva);
 		assertThrows(InternalErrorException.class, () -> {  vendedorService.modificarVendedor(request); });
 		
 

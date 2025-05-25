@@ -4,8 +4,8 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.arqsoft.medici.domain.Vendedor;
-import com.arqsoft.medici.domain.dto.VendedorDTO;
-import com.arqsoft.medici.domain.dto.VendedorDatosDTO;
+import com.arqsoft.medici.domain.dto.VendedorDatosDomainDTO;
+import com.arqsoft.medici.domain.dto.VendedorDomainDTO;
 import com.arqsoft.medici.domain.exceptions.FormatoEmailInvalidoException;
 import com.arqsoft.medici.domain.exceptions.InternalErrorException;
 import com.arqsoft.medici.domain.exceptions.VendedorExistenteException;
@@ -14,7 +14,7 @@ import com.arqsoft.medici.domain.utils.FormatUtils;
 import com.arqsoft.medici.domain.utils.VendedorEstado;
 import com.arqsoft.medici.infrastructure.persistence.VendedorRepository;
 import io.micrometer.common.util.StringUtils;
-import com.arqsoft.medici.infrastructure.cliente.UsuarioCliente;
+
 
 @Service
 public class VendedorServiceImpl implements VendedorService {
@@ -23,7 +23,7 @@ public class VendedorServiceImpl implements VendedorService {
 	private VendedorRepository vendedorRepository;
 
 	@Override
-	public void crearVendedor(VendedorDTO request) throws InternalErrorException, FormatoEmailInvalidoException, VendedorExistenteException {
+	public void crearVendedor(VendedorDomainDTO request) throws InternalErrorException, FormatoEmailInvalidoException, VendedorExistenteException {
 		
 		if(StringUtils.isBlank(request.getMail())) {
 			throw new InternalErrorException("El campo mail no debe viajar vacio");
@@ -50,7 +50,7 @@ public class VendedorServiceImpl implements VendedorService {
 	}
 	
 	@Override
-	public void modificarVendedor(VendedorDTO request) throws InternalErrorException, VendedorNoEncontradoException {
+	public void modificarVendedor(VendedorDomainDTO request) throws InternalErrorException, VendedorNoEncontradoException {
 		
 		if(StringUtils.isBlank(request.getMail())) {
 			throw new InternalErrorException("El campo mail no debe viajar vacio");
@@ -115,26 +115,25 @@ public class VendedorServiceImpl implements VendedorService {
 	}
 	
 	@Override
-	public VendedorDatosDTO obtenerVendedor(String mail) {
+	public VendedorDatosDomainDTO obtenerVendedor(String mail) throws VendedorNoEncontradoException {
 	
 		Optional<Vendedor> opcionalVendedor = vendedorRepository.findById(mail);
 		
+		if(opcionalVendedor.isEmpty()) {
+		  throw new VendedorNoEncontradoException();
+		}
+		
 		Vendedor vendedor = opcionalVendedor.get();
 		
-		VendedorDatosDTO dto = new VendedorDatosDTO();
+		VendedorDatosDomainDTO dto = new VendedorDatosDomainDTO();
 		dto.setEstado(vendedor.getEstado());
 		dto.setMail(vendedor.getMail());
 		dto.setRazonSocial(vendedor.getRazonSocial());
-		/*
-		for(Producto p : vendedor.getProductosListados()) {
-	    	ProductoResponseDTO pDTO = new ProductoResponseDTO(p.getProductoId(), p.getNombre(), p.getDescripcion(), p.getPrecio(), p.getStock(), p.getCategoria(),p.getEstado(), p.getVendedor().getMail());
-			dto.getProductosListados().add(pDTO);
-		}
-		*/
+
 		return dto;
 	}
 
-	private void actualizarDatosVendedor(VendedorDTO request, Vendedor vendedor) {
+	private void actualizarDatosVendedor(VendedorDomainDTO request, Vendedor vendedor) {
 
 		if(StringUtils.isNotBlank(request.getRazonSocial())) {
 			vendedor.setRazonSocial(request.getRazonSocial());

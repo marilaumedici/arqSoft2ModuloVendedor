@@ -1,16 +1,19 @@
 package com.arqsoft.medici.infrastructure.rest;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import com.arqsoft.medici.application.VendedorService;
-import com.arqsoft.medici.domain.dto.VendedorDTO;
-import com.arqsoft.medici.domain.dto.VendedorDatosDTO;
+import com.arqsoft.medici.domain.dto.VendedorDatosDomainDTO;
+import com.arqsoft.medici.domain.dto.VendedorDomainDTO;
 import com.arqsoft.medici.domain.exceptions.FormatoEmailInvalidoException;
 import com.arqsoft.medici.domain.exceptions.InternalErrorException;
 import com.arqsoft.medici.domain.exceptions.VendedorExistenteException;
 import com.arqsoft.medici.domain.exceptions.VendedorNoEncontradoException;
+import com.arqsoft.medici.infrastructure.rest.dto.VendedorDTO;
+import com.arqsoft.medici.infrastructure.rest.dto.VendedorDatosDTO;
 import com.arqsoft.medici.infrastructure.rest.puertos.VendedorController;
 
 
@@ -19,12 +22,14 @@ public class VendedorControllerImpl implements VendedorController {
 	
 	@Autowired
 	private VendedorService vendedorService;
+	private ModelMapper modelMapper = new ModelMapper();
 	
     @Override
-	public void crearVendedor(VendedorDTO request) {
+	public void crearVendedor(VendedorDTO dto) {
 
     	try {
     		
+    		VendedorDomainDTO request = modelMapper.map(dto, VendedorDomainDTO.class);
 			vendedorService.crearVendedor(request);
 			
 		} catch (InternalErrorException e) {
@@ -34,7 +39,7 @@ public class VendedorControllerImpl implements VendedorController {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El email debe poseer un formato valido.", e);
 			
 		} catch (VendedorExistenteException e) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El vendedor "+request.getMail()+" ya existe.", e);
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El vendedor "+dto.getMail()+" ya existe.", e);
 
 		} catch (Exception e) {
 			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Hubo un error, por favor vuelva a probar mas adelante.", e);
@@ -43,17 +48,18 @@ public class VendedorControllerImpl implements VendedorController {
     }
     
     @Override
-	public void modificarVendedor(VendedorDTO request) {
+	public void modificarVendedor(VendedorDTO dto) {
     	
     	try {
     		
+    		VendedorDomainDTO request = modelMapper.map(dto, VendedorDomainDTO.class);
 			vendedorService.modificarVendedor(request);
 			
 		} catch (InternalErrorException e) {
 			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
 			
 		} catch (VendedorNoEncontradoException e) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No se encontro el vendedor "+request.getMail()+".", e);
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No se encontro el vendedor "+dto.getMail()+".", e);
 			
 		} catch (Exception e) {
 			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Hubo un error, por favor vuelva a probar mas adelante.", e);
@@ -84,8 +90,19 @@ public class VendedorControllerImpl implements VendedorController {
     @Override
 	public VendedorDatosDTO obtenerVendedor(String mail) {
 		
-    	return vendedorService.obtenerVendedor(mail);
-    	
+    	try {
+    		
+    		VendedorDatosDomainDTO response = vendedorService.obtenerVendedor(mail);
+    		VendedorDatosDTO dto = modelMapper.map(response, VendedorDatosDTO.class);
+    		return dto;
+			
+		} catch (VendedorNoEncontradoException e) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No se encontro el vendedor "+mail+".", e);
+
+		} catch (Exception e) {
+			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Hubo un error, por favor vuelva a probar mas adelante.", e);
+			
+		}
     }
 
 	public VendedorService getVendedorService() {

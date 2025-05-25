@@ -1,4 +1,4 @@
-package com.arqsoft.medici.domain.dto;
+package com.arqsoft.medici.infrastructure.rest.dto;
 
 import com.arqsoft.medici.domain.utils.ProductoCategoria;
 

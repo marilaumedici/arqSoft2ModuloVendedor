@@ -1,4 +1,4 @@
-package com.arqsoft.medici.domain.dto;
+package com.arqsoft.medici.infrastructure.rest.dto;
 
 import java.util.ArrayList;
 import java.util.List;

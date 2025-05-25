@@ -1,13 +1,13 @@
 package com.arqsoft.medici.domain.dto;
 
-public class VendedorDTO {
+public class VendedorDomainDTO {
 	
-	public VendedorDTO(String mail, String razonSocial) {
+	public VendedorDomainDTO(String mail, String razonSocial) {
 		super();
 		this.mail = mail;
 		this.razonSocial = razonSocial;
 	}
-	public VendedorDTO() {
+	public VendedorDomainDTO() {
 
 	}
 	private String mail;
@@ -25,5 +25,6 @@ public class VendedorDTO {
 	public void setRazonSocial(String razonSocial) {
 		this.razonSocial = razonSocial;
 	}
+
 
 }
