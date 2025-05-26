@@ -27,6 +27,17 @@ public class ProductoDomainResponseDTO {
 		this.estado = estado;
 	}
 	
+	public ProductoDomainResponseDTO(String nombre, String descripcion, double precio, int stock, ProductoCategoria categoria, ProductoEstado estado, String mailVendedor) {
+		super();
+		this.nombre = nombre;
+		this.descripcion = descripcion;
+		this.precio = precio;
+		this.stock = stock;
+		this.categoria = categoria;
+		this.mailVendedor = mailVendedor;
+		this.estado = estado;
+	}
+	
 	public ProductoDomainResponseDTO() {}
 	
 	

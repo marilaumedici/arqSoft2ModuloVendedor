@@ -3,6 +3,7 @@ package com.arqsoft.medici.application;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Date;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.arqsoft.medici.domain.Venta;
@@ -18,6 +19,7 @@ import com.arqsoft.medici.infrastructure.cliente.NotificacionRequestDTO;
 import com.arqsoft.medici.infrastructure.cliente.UsuarioCliente;
 import com.arqsoft.medici.infrastructure.cliente.UsuarioResponseDTO;
 import com.arqsoft.medici.infrastructure.persistence.VentaRepository;
+import com.arqsoft.medici.domain.dto.VentaDomainDTO;
 import io.micrometer.common.util.StringUtils;
 
 @Service
@@ -40,9 +42,12 @@ public class VentaServiceImpl  implements VentaService {
 	private NotificacionCliente notificacionClient;
 	
 	private ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("America/Argentina/Buenos_Aires"));
+	
+	private ModelMapper modelMapper = new ModelMapper();
+
 
 	@Override
-	public void procesarVenta(RegistrarVentaDomainDTO request) throws InternalErrorException, ValidacionException, ProductoInexistenteException, UsuarioNoEncontradoException {
+	public VentaDomainDTO procesarVenta(RegistrarVentaDomainDTO request) throws InternalErrorException, ValidacionException, ProductoInexistenteException, UsuarioNoEncontradoException {
 		
 		if(StringUtils.isBlank(request.getProductoId())) {
 			throw new InternalErrorException("El id del producto no puede estar vacio.");
@@ -67,9 +72,13 @@ public class VentaServiceImpl  implements VentaService {
 		Venta venta = new Venta(request.getProductoId(), vendedor.getMail(), request.getMailComprador(), date,
 				producto.getPrecio(), producto.getPrecio() * request.getCantidad(), request.getCantidad());
 		
-		ventaRepository.insert(venta);
+		Venta result = ventaRepository.insert(venta);
+		
+		VentaDomainDTO dto = modelMapper.map(result, VentaDomainDTO.class);
 	
 		enviarMailsNotificacion(usuario, producto, vendedor);
+		
+		return dto;
 	}
 
 	private void enviarMailsNotificacion(UsuarioResponseDTO usuario, Producto producto, Vendedor vendedor) {
@@ -79,7 +88,7 @@ public class VentaServiceImpl  implements VentaService {
 			// envio notificaciones al vendedor
 			NotificacionRequestDTO notificacionVendedorDTO = new NotificacionRequestDTO(); 
 			notificacionVendedorDTO.setEmail("marilaumedici@gmail.com");
-			notificacionVendedorDTO.setEmail(vendedor.getMail());
+			//notificacionVendedorDTO.setEmail(vendedor.getMail());
 			notificacionVendedorDTO.setNombreUsuario(vendedor.getRazonSocial());
 			notificacionVendedorDTO.setNombreProducto(producto.getNombre());
 			
@@ -88,7 +97,7 @@ public class VentaServiceImpl  implements VentaService {
 			// envio notificaciones al usuario
 			NotificacionRequestDTO notificacionUsuarioDTO = new NotificacionRequestDTO(); 
 			notificacionUsuarioDTO.setEmail("marilaumedici@gmail.com");
-			notificacionUsuarioDTO.setEmail(usuario.getMail());
+			//notificacionUsuarioDTO.setEmail(usuario.getMail());
 			notificacionUsuarioDTO.setNombreUsuario(usuario.getNombre() + " " + usuario.getApellido());
 			notificacionUsuarioDTO.setNombreProducto(producto.getNombre());
 			
