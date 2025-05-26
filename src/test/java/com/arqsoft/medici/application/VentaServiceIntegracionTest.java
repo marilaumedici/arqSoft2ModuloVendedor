@@ -1,6 +1,7 @@
 package com.arqsoft.medici.application;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -118,6 +119,32 @@ public class VentaServiceIntegracionTest {
 	    productoRepository.deleteById(productoBDD.getProductoId());
 	    usuarioClient.eliminarUsuario(compradorMail);
 	    vendedorService.eliminarVendedor(vendedorMail);
+	}
+	
+	
+	@Test
+	public void testCrearVentaStockInsuficiente() throws InternalErrorException, FormatoEmailInvalidoException, VendedorExistenteException, VendedorNoEncontradoException, ValidacionException, ProductoInexistenteException, UsuarioNoEncontradoException {
+	
+		String vendedorMail = "vendedortest3@prueba.com";
+		String compradorMail = "compradortest3@prueba.com";
+		
+		//Se crea el usuario comprador
+		UsuarioDTO usuarioTest = new UsuarioDTO("Testy", "Testy", compradorMail);
+		usuarioClient.crearUsuario(usuarioTest);
+		//Se crea el usuario vendedor
+		VendedorDomainDTO vendedorTest = new VendedorDomainDTO(vendedorMail, "Vendedor Prueba");
+		vendedorService.crearVendedor(vendedorTest);
+		
+		ProductoDomainDTO productoTest = new ProductoDomainDTO("Donas de frutilla", "Caja de 6 donas de frutilla", 12000, 1, ProductoCategoria.ALIMENTOS, vendedorMail);
+		ProductoDomainResponseDTO productoResponse = productoService.crearProducto(productoTest);
+		
+		RegistrarVentaDomainDTO solicitarventa =  new RegistrarVentaDomainDTO(productoResponse.getCodigoProducto(), compradorMail, 5);		
+		assertThrows(ValidacionException.class, () -> { ventaService.procesarVenta(solicitarventa); });
+
+	    productoRepository.deleteById(productoResponse.getCodigoProducto());
+	    usuarioClient.eliminarUsuario(compradorMail);
+	    vendedorService.eliminarVendedor(vendedorMail);
+		
 	}
 	
 
