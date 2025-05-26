@@ -37,7 +37,6 @@ public class VentaServiceIntegracionTest {
 	@Autowired
 	private ProductoServiceImpl productoService;
 	
-	
 	@Autowired
 	private UsuarioCliente usuarioClient;
 	
@@ -53,18 +52,21 @@ public class VentaServiceIntegracionTest {
 	
 	@Test
 	public void testCrearVentaCorrecta() throws InternalErrorException, FormatoEmailInvalidoException, VendedorExistenteException, VendedorNoEncontradoException, ValidacionException, ProductoInexistenteException, UsuarioNoEncontradoException {
+
+		String vendedorMail = "vendedortest@prueba.com";
+		String compradorMail = "compradortest@prueba.com";
 		
 		//Se crea el usuario comprador
-		UsuarioDTO usuarioTest = new UsuarioDTO("Testy", "Testy", "compradortest@prueba.com");
+		UsuarioDTO usuarioTest = new UsuarioDTO("Testy", "Testy", compradorMail);
 		usuarioClient.crearUsuario(usuarioTest);
 		//Se crea el usuario vendedor
-		VendedorDomainDTO vendedorTest = new VendedorDomainDTO("vendedortest@prueba.com", "Vendedor Prueba");
+		VendedorDomainDTO vendedorTest = new VendedorDomainDTO(vendedorMail, "Vendedor Prueba");
 		vendedorService.crearVendedor(vendedorTest);
 		
-		ProductoDomainDTO productoTest = new ProductoDomainDTO("Donas", "Caja de 6 donas de chocolate", 12000, 50, ProductoCategoria.ALIMENTOS, "vendedortest@prueba.com");
+		ProductoDomainDTO productoTest = new ProductoDomainDTO("Donas de chocolate", "Caja de 6 donas de chocolate", 12000, 50, ProductoCategoria.ALIMENTOS, vendedorMail);
 		ProductoDomainResponseDTO productoResponse = productoService.crearProducto(productoTest);
 		
-		RegistrarVentaDomainDTO solicitarventa =  new RegistrarVentaDomainDTO(productoResponse.getCodigoProducto(), "compradortest@prueba.com", 2);
+		RegistrarVentaDomainDTO solicitarventa =  new RegistrarVentaDomainDTO(productoResponse.getCodigoProducto(), compradorMail, 2);
 		VentaDomainDTO  venta = ventaService.procesarVenta(solicitarventa);
 		
 		Producto productoBDD = productoService.obtenerProductoByID(productoResponse.getCodigoProducto());
@@ -74,12 +76,48 @@ public class VentaServiceIntegracionTest {
 	    assertEquals(2, venta.getCantidadComprada());
 	    assertEquals(2 * 12000, venta.getPrecioFinal());
 	    assertEquals(productoResponse.getCodigoProducto(), venta.getProductoId());
-	    assertEquals("compradortest@prueba.com", venta.getMailComprador());
-	    assertEquals("vendedortest@prueba.com", venta.getMailVendedor());
+	    assertEquals(compradorMail, venta.getMailComprador());
+	    assertEquals(vendedorMail, venta.getMailVendedor());
 
 	    ventaRepository.deleteById(venta.getVentaId());
 	    productoRepository.deleteById(productoBDD.getProductoId());
+	    usuarioClient.eliminarUsuario(compradorMail);
+	    vendedorService.eliminarVendedor(vendedorMail);
+	}
+	
+	@Test
+	public void testCrearVentaCorrectaAgotoProducto() throws InternalErrorException, FormatoEmailInvalidoException, VendedorExistenteException, VendedorNoEncontradoException, ValidacionException, ProductoInexistenteException, UsuarioNoEncontradoException {
 		
+		String vendedorMail = "vendedortest2@prueba.com";
+		String compradorMail = "compradortest2@prueba.com";
+		
+		//Se crea el usuario comprador
+		UsuarioDTO usuarioTest = new UsuarioDTO("Testy", "Testy", compradorMail);
+		usuarioClient.crearUsuario(usuarioTest);
+		//Se crea el usuario vendedor
+		VendedorDomainDTO vendedorTest = new VendedorDomainDTO(vendedorMail, "Vendedor Prueba");
+		vendedorService.crearVendedor(vendedorTest);
+		
+		ProductoDomainDTO productoTest = new ProductoDomainDTO("Donas de vainilla", "Caja de 6 donas de vainilla", 12000, 2, ProductoCategoria.ALIMENTOS, vendedorMail);
+		ProductoDomainResponseDTO productoResponse = productoService.crearProducto(productoTest);
+		
+		RegistrarVentaDomainDTO solicitarventa =  new RegistrarVentaDomainDTO(productoResponse.getCodigoProducto(), compradorMail, 2);
+		VentaDomainDTO  venta = ventaService.procesarVenta(solicitarventa);
+		
+		Producto productoBDD = productoService.obtenerProductoByIDNoEstado(productoResponse.getCodigoProducto());
+		
+	    assertEquals(0, productoBDD.getStock());
+	    assertEquals(ProductoEstado.NO_DISPONIBLE, productoBDD.getEstado());
+	    assertEquals(2, venta.getCantidadComprada());
+	    assertEquals(2 * 12000, venta.getPrecioFinal());
+	    assertEquals(productoBDD.getProductoId(), venta.getProductoId());
+	    assertEquals(compradorMail, venta.getMailComprador());
+	    assertEquals(vendedorMail, venta.getMailVendedor());
+
+	    ventaRepository.deleteById(venta.getVentaId());
+	    productoRepository.deleteById(productoBDD.getProductoId());
+	    usuarioClient.eliminarUsuario(compradorMail);
+	    vendedorService.eliminarVendedor(vendedorMail);
 	}
 	
 

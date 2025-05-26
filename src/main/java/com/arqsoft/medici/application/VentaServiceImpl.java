@@ -76,7 +76,7 @@ public class VentaServiceImpl  implements VentaService {
 		
 		VentaDomainDTO dto = modelMapper.map(result, VentaDomainDTO.class);
 	
-		enviarMailsNotificacion(usuario, producto, vendedor);
+		//enviarMailsNotificacion(usuario, producto, vendedor);
 		
 		return dto;
 	}
