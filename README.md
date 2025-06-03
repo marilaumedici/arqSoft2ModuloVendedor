@@ -56,7 +56,7 @@ Luego configure las siguientes variables de entorno:
 ### Instalación del proyecto Libre Mercado
 
 ```bash
-git clone https://github.com/marilaumedici/arqSoft2.git
+git clone https://github.com/marilaumedici/arqSoft2ModuloVendedor
 ```
 
 
