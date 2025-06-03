@@ -2,6 +2,16 @@ package com.arqsoft.medici.domain.dto;
 
 public class RegistrarVentaDomainDTO {
 	
+	public RegistrarVentaDomainDTO(String productoId, String mailComprador, Integer cantidad) {
+		super();
+		this.productoId = productoId;
+		this.mailComprador = mailComprador;
+		this.cantidad = cantidad;
+	}
+	
+	public RegistrarVentaDomainDTO() {
+
+	}
 	private String productoId;
 	private String mailComprador;
 	private Integer cantidad;

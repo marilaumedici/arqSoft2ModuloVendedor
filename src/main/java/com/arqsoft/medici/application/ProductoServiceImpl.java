@@ -171,6 +171,20 @@ public class ProductoServiceImpl implements ProductoService {
 	}
 	
 	@Override
+	public Producto obtenerProductoByIDNoEstado(String productoId) throws ProductoInexistenteException {
+		
+		
+		Optional<Producto> opcionalProducto = productoRepository.findById(productoId);
+		
+		if(opcionalProducto.isPresent()) {
+			return opcionalProducto.get();
+			
+		}
+		
+		throw new ProductoInexistenteException();
+	}
+	
+	@Override
 	public void descontarStock(Producto producto, Integer cantidad) throws ValidacionException {
 		
 		if(cantidad <= 0) {

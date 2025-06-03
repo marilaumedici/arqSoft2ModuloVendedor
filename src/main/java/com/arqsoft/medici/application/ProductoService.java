@@ -31,5 +31,7 @@ public interface ProductoService {
 	public void descontarStock(Producto producto, Integer cantidad) throws ValidacionException;
 
 	public ProductosVendedorDomainDTO obtenerProductosFiltrados(FiltroBuscadorProductoDomain request);
+	
+	public Producto obtenerProductoByIDNoEstado(String productoId) throws ProductoInexistenteException;
 
 }

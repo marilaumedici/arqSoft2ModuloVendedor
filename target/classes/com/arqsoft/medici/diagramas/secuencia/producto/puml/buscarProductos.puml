@@ -1,0 +1,46 @@
+@startuml
+actor Usuario
+activate ProductoController
+activate ProductoService
+activate ProductoDAO
+activate MongoTemplate
+
+title Un usuario realiza la busqueda de productos
+
+Usuario -> ProductoController: buscarProductos
+
+ProductoController -> ProductoService: buscarProductos
+
+ProductoService -> ProductoDAO: buscarProductos
+
+ProductoDAO -> ProductoDAO: crearCriteria
+
+ProductoDAO -> ProductoDAO: agregarFiltroProductosDisponibles
+
+ProductoDAO -> ProductoDAO: agregarFiltroVendedoresActivos
+
+ProductoDAO -> ProductoDAO: agregarFiltroPrecios
+
+ProductoDAO -> ProductoDAO: agregarFiltroCategoria
+
+ProductoDAO -> ProductoDAO: agregarFiltroDescripcion
+
+ProductoDAO -> MongoTemplate: buscarProductosFiltradosPaginados
+
+MongoTemplate -> ProductoDAO: <<productos>>
+
+ProductoDAO -> ProductoService: <<productos>>
+
+ProductoService -> ProductoController: <<productos>>
+
+ProductoController -> Usuario: <<productos>>
+
+legend
+<b>ESCENARIO:</b> Usuario quiere ver productos para su compra
+
+<b>COMO</b> usuario de Libre Mercado 
+<b>QUIERO</b> poder buscar varios productos
+<b>PARA</b> poder elegir de entre ellos uno poder comprarlo
+end legend
+
+@enduml
